@@ -21,6 +21,7 @@ Spine user guide: http://esotericsoftware.com/spine-user-guide
 ## Requirements
 
 - Only tested on Blender 3.5 and 3.6, should work on 3.3+.
+  - Blender 4.1 Compatibilty added.
 - Python 3.7 as the blender python version is 3.7.
 - Spine 4.0 json format, some Master Duel Spine animation may not load correctly event on Spine's official editor.
 
@@ -28,7 +29,7 @@ Spine user guide: http://esotericsoftware.com/spine-user-guide
 
 ## Installation
 
-1. Place this addon folder to your blender addon folder: `\Blender\3.X\scripts\addons`
+1. Place this addon folder to your blender addon folder: `\Blender\X.X\scripts\addons`
 2. Enable this addon in blender addon list: `Edit > Preferences > Add-ons > Import-Export: MD Spine Tools`
 
 ![zeus](https://github.com/UNOWEN-OwO/md_spine_tools/assets/41463621/439c30d7-7b2d-4bc2-8095-004c6cce5bbe)
@@ -40,6 +41,8 @@ Place the spine json file, atlas text file and atlas images (non-separate) in th
 In 3D View's sidebar, select the spine json file and atlas text file first to import spine mesh and material. **This will remove all existing objects in `bpy.data` like `meshes` `materials` `armatures` `actions` `collections`**
 
 Then select animation to be load (default last animation, as MD uses the latest).
+
+If you want to quickly create a scene to export with a camera and materials changed likc the Setup Scene Button after you import the files.
 
 **Separate Material** will create material due to atlas images but not mesh, will disable the rgba keyframe feature (blend in and out).
 

@@ -444,7 +444,7 @@ def load_spine(mdst_spine):
             new_bone.parent = bone_control_objs[bone.parent_bone.bone_idx]
             new_bone.use_connect = False
             new_bone.use_inherit_rotation = True
-            new_bone.use_inherit_scale = True
+            new_bone.inherit_scale = 'FULL'
 
             new_bone.head = (0, 0, 0)
             new_bone.tail = (bone.length or 1, 0, 0)
@@ -467,7 +467,7 @@ def load_spine(mdst_spine):
             new_bone.parent = bone_control_objs[ik.parent_bone.parent_bone.bone_idx]
             new_bone.use_connect = False
             new_bone.use_inherit_rotation = True
-            new_bone.use_inherit_scale = True
+            new_bone.inherit_scale = 'FULL'
             new_bone.use_deform = False
 
             new_bone.head = new_bone.parent.head
@@ -506,7 +506,7 @@ def load_spine(mdst_spine):
             new_bone.parent = bone_objs[bone.parent_bone.bone_idx]
             new_bone.use_connect = False
             new_bone.use_inherit_rotation = True
-            new_bone.use_inherit_scale = True
+            new_bone.inherit_scale = 'FULL'
 
             new_bone.head = (bone.abs_x, 0, bone.abs_y)
             new_bone.tail = (new_bone.head[0] + bone.dx,

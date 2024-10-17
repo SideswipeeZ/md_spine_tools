@@ -79,8 +79,8 @@ class MDST_OT_ImportAtlas(Operator, ImportHelper):
     bl_description = bl_label = 'Import MD Spine Atlas'
     bl_options = {'REGISTER', 'UNDO'}
 
-    filename_ext = '*.txt;.*.atlas.txt;*.asset'
-    filter_glob: StringProperty(default='*.txt;.*.atlas.txt;*.asset', options={'HIDDEN'})
+    filename_ext = '*.atlas;*.txt;.*.atlas.txt;*.asset'
+    filter_glob: StringProperty(default='*.atlas;*.txt;.*.atlas.txt;*.asset', options={'HIDDEN'})
     filepath: StringProperty(name='File Path', maxlen=1024)
 
     def execute(self, context):
@@ -153,6 +153,72 @@ class MDST_OT_ClearAnimation(Operator):
         delete_helper(['actions'])
         return {'FINISHED'}
 
+class MDST_OT_SetUpScene(Operator):
+    bl_idname = 'md_spine_tools.set_up_scene'
+    bl_label = 'Set Up Scene'
+    bl_description = 'Configure render settings, create and configure camera, and adjust materials'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Set Film > Transparency to on in Render Settings
+        context.scene.render.film_transparent = True
+
+        # Set the Resolution to 4K (3840x2160)
+        context.scene.render.resolution_x = 3840
+        context.scene.render.resolution_y = 2160
+
+        # Set the Color Management > View Transform to "Standard"
+        context.scene.view_settings.view_transform = 'Standard'
+
+        # Set the World Light Setting to 20
+        if context.scene.world:
+            context.scene.world.node_tree.nodes["Background"].inputs[1].default_value = 20.0
+        else:
+            # Create a world if it doesn't exist
+            world = bpy.data.worlds.new("World")
+            context.scene.world = world
+            world.use_nodes = True
+            bg_node = world.node_tree.nodes.new(type='ShaderNodeBackground')
+            bg_node.inputs[1].default_value = 20.0
+            world_output = world.node_tree.nodes.get('World Output')
+            world.node_tree.links.new(bg_node.outputs[0], world_output.inputs[0])
+
+        # Create a Camera
+        camera_data = bpy.data.cameras.new(name="Camera")
+        camera_object = bpy.data.objects.new("Camera", camera_data)
+        context.collection.objects.link(camera_object)
+
+        # Move the Camera to Y = -950m
+        camera_object.location = (0, -950, 0)
+
+        # Rotate the Camera to 90 degrees on the X axis
+        camera_object.rotation_euler = (1.5708, 0, 0)  # 1.5708 radians is 90 degrees
+
+        # Set the Camera's Focal Length to 10mm
+        camera_data.lens = 10
+
+        # Set the Camera as the active camera in the scene
+        context.scene.camera = camera_object
+
+        # Iterate over all materials in the scene
+        for material in bpy.data.materials:
+            # Ensure the material uses nodes
+            if material.use_nodes:
+                # Access the material's node tree
+                nodes = material.node_tree.nodes
+                # Iterate through all nodes in the node tree
+                for node in nodes:
+                    # Identify the Principled BSDF node
+                    if node.type == 'BSDF_PRINCIPLED':
+                        # Set the specular input (index 12) to 0
+                        if len(node.inputs) > 12:  # Ensure there are enough inputs
+                            node.inputs[12].default_value = 0
+            else:
+                # If the material doesn't use nodes, set the old specular property to 0
+                material.specular_intensity = 0
+
+        return {'FINISHED'}
+
 
 class MDST_PT_Tools(Panel):
     bl_category = 'MDST Spine Tools'
@@ -188,7 +254,10 @@ class MDST_PT_Tools(Panel):
         row.operator('md_spine_tools.toggle_armature_constrain', icon='MODIFIER_ON' if spine.armature_constrain else 'MODIFIER_OFF', text='Toggle Armature Constrain')
         if not context.scene.mdst_spine.spine_loaded:
             row.enabled = False
-
+        # Add the new button here
+        self.layout.label(text='Setup Scene:', icon='SCENE')
+        row = self.layout.row(align=True)
+        row.operator('md_spine_tools.set_up_scene', icon='CAMERA_DATA', text='Set Up Scene')
 
 class MDST_PT_Animation(Panel):
     bl_category = 'MDST Spine Tools'
@@ -213,7 +282,7 @@ class MDST_PT_Animation(Panel):
                 self.layout.label(text='No Data', icon='ERROR')
 
 
-classes = [MDSTSpine, MDST_OT_ImportSpine, MDST_OT_ImportAtlas, MDST_OT_LoadSpine, MDST_OT_ApplyPose, MDST_OT_ToggleArmatureConstrain, MDST_OT_LoadAnimation, MDST_OT_ClearAnimation, MDST_PT_Tools, MDST_PT_Animation]
+classes = [MDSTSpine, MDST_OT_SetUpScene, MDST_OT_ImportSpine, MDST_OT_ImportAtlas, MDST_OT_LoadSpine, MDST_OT_ApplyPose, MDST_OT_ToggleArmatureConstrain, MDST_OT_LoadAnimation, MDST_OT_ClearAnimation, MDST_PT_Tools, MDST_PT_Animation]
 
 
 def register():
